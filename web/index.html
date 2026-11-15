@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ontario Spatial Separation Calculator | Dust 2 Engineering Inc.</title>
+<style>
+:root{color-scheme:dark}
+body{background:#0e1116;color:#e6e9ee;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:24px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:1.55rem;line-height:1.25;margin:.2em 0 .1em}
+h2{font-size:1.15rem;margin-top:1.6em;color:#ffd479}
+.sub{color:#9fb0c3;margin:.2em 0 1.2em}
+.card{background:#161b22;border:1px solid #2b333f;border-radius:12px;padding:18px;margin:14px 0}
+label{display:block;margin:.7em 0 .25em;color:#c8d3e0;font-size:.95rem}
+input,select{width:100%;box-sizing:border-box;background:#0e1116;color:#e6e9ee;border:1px solid #39424f;border-radius:8px;padding:9px;font-size:1rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+button{background:#f0a832;color:#14100a;border:0;border-radius:8px;padding:11px 18px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:14px}
+button.ghost{background:#232a35;color:#e6e9ee}
+pre{background:#0a0d11;border:1px solid #2b333f;border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-word;font-size:.92rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid #2b333f;padding:6px 8px;text-align:left}
+th{background:#1b212b}
+.small{color:#9fb0c3;font-size:.88rem}
+a{color:#7cc4ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Ontario Spatial Separation Calculator</h1>
+<p class="sub">How much of a wall facing the property line can be windows and doors — OBC 3.2.3.1, Table 3.2.3.1.B (small faces, not sprinklered).</p>
+<div class="card">
+<label>Exposing building face area (m&sup2;)</label>
+<select id="face"><option value="10">10</option><option value="15">15</option><option value="20" selected>20</option></select>
+<div class="row"><div><label>Face length (m)</label><input id="len" type="number" value="8" step="0.1"></div>
+<div><label>Face height (m)</label><input id="hgt" type="number" value="3.2" step="0.1"></div></div>
+<label>Limiting distance to the property line (m)</label>
+<input id="ld" type="number" value="2.5" step="0.1" min="0">
+<button onclick="go()">Calculate permitted openings</button>
+</div>
+<h2>Result</h2>
+<pre id="out">Your spatial separation check will appear here.</pre>
+<p class="small">Ontario Building Code 3.2.3 limits the unprotected openings (windows, doors without the
+required rating) in a wall that faces a property line, so fire is less likely to jump between buildings.
+The permitted percentage comes from Table 3.2.3.1.B for a building that is not sprinklered throughout
+(Groups A, C, D and F Division 3) and depends on the limiting distance, the area of the exposing building
+face, and its length-to-height ratio. This quick tool covers the verified rows for faces of 10, 15 and
+20 m&sup2; — the full table continues to much larger faces, and sprinklered buildings use Tables
+3.2.3.1.D and 3.2.3.1.E.</p>
+<p class="small">Free tool by <b>Dust 2 Engineering Inc.</b>, Mississauga, Ontario — building permit
+drawings for restaurants and small commercial projects across the GTA, stamped by an Ontario P.Eng.
+Flat rate $3,500–$5,000. Questions or a project to discuss: open an issue in this repository.</p>
+</div>
+<script>
+
+const LDS = [0, 1.2, 1.5, 2.0, 2.5, 3, 4, 5, 6, 7, 8];
+const TB = {"10": {"lt3": [0, 8, 10, 18, 29, 46, 91, 100], "3to10": [0, 8, 12, 21, 33, 50, 96, 100], "gt10": [0, 11, 18, 32, 48, 68, 100]}, "15": {"lt3": [0, 7, 9, 14, 22, 33, 63, 100], "3to10": [0, 8, 10, 17, 25, 37, 67, 100]}, "20": {"lt3": [0, 7, 9, 12, 18, 26, 49, 81, 100], "3to10": [0, 8, 10, 15, 21, 30, 53, 85, 100]}};
+function pct(face, band, ld){
+  const row = (TB[String(face)] || {})[band];
+  if (!row) return null;
+  let idx = 0;
+  for (let i = 0; i < LDS.length; i++){ if (LDS[i] <= ld) idx = i; }
+  return idx < row.length ? row[idx] : 100;
+}
+function go(){
+  const face = parseFloat(document.getElementById('face').value);
+  const L = parseFloat(document.getElementById('len').value) || 0;
+  const H = parseFloat(document.getElementById('hgt').value) || 1;
+  const ld = parseFloat(document.getElementById('ld').value) || 0;
+  const ratio = Math.max(L / H, H / L);
+  const band = ratio < 3 ? 'lt3' : (ratio <= 10 ? '3to10' : 'gt10');
+  const v = pct(face, band, ld);
+  let out = '';
+  if (v === null){ out = 'Outside the verified rows of this quick tool (face areas 10 / 15 / 20 m2; the 15 and 20 m2 rows cover L/H up to 10:1). Consult the full Table 3.2.3.1.B in the Code.'; }
+  else {
+    out = 'Exposing face ' + face + ' m2, L/H ratio ' + ratio.toFixed(1) + ':1, limiting distance ' + ld + ' m\n';
+    out += 'Maximum aggregate unprotected openings: ' + v + '% of the face = ' + (v * face / 100).toFixed(2) + ' m2\n';
+    if (ld >= 1.2 && ld <= 2) out += 'Each individual opening (not sprinklered, LD <= 2 m): max ' + (0.24 * Math.pow(2 * ld - 1.2, 2)).toFixed(2) + ' m2 (Table 3.2.3.1.A)\n';
+    out += 'Sprinklered buildings use Tables 3.2.3.1.D / E and allow more. Preliminary only - verify against the OBC in force.';
+  }
+  document.getElementById('out').textContent = out;
+}
+
+</script>
+</body>
+</html>
