@@ -1,0 +1,104 @@
+{
+  "code": "Ontario Building Code (2024), Division B, Article 3.2.3.1",
+  "limiting_distance_columns_m": [
+    0,
+    1.2,
+    1.5,
+    2.0,
+    2.5,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "table_3.2.3.1B_not_sprinklered_groups_A_C_D_F3_percent": {
+    "10": {
+      "lt3": [
+        0,
+        8,
+        10,
+        18,
+        29,
+        46,
+        91,
+        100
+      ],
+      "3to10": [
+        0,
+        8,
+        12,
+        21,
+        33,
+        50,
+        96,
+        100
+      ],
+      "gt10": [
+        0,
+        11,
+        18,
+        32,
+        48,
+        68,
+        100
+      ]
+    },
+    "15": {
+      "lt3": [
+        0,
+        7,
+        9,
+        14,
+        22,
+        33,
+        63,
+        100
+      ],
+      "3to10": [
+        0,
+        8,
+        10,
+        17,
+        25,
+        37,
+        67,
+        100
+      ]
+    },
+    "20": {
+      "lt3": [
+        0,
+        7,
+        9,
+        12,
+        18,
+        26,
+        49,
+        81,
+        100
+      ],
+      "3to10": [
+        0,
+        8,
+        10,
+        15,
+        21,
+        30,
+        53,
+        85,
+        100
+      ]
+    }
+  },
+  "individual_opening_max_area_table_3.2.3.1A": {
+    "formula": "0.24 * (2*LD - 1.2)^2 for LD >= 1.2 m, building not sprinklered, LD <= 2 m",
+    "points": {
+      "1.2": 0.35,
+      "1.5": 0.78,
+      "2.0": 1.88
+    }
+  },
+  "scope_note": "Rows verified for exposing building face areas of 10, 15 and 20 m2 (length/height bands under 3:1 and 3:1 to 10:1; the 10 m2 row also over 10:1). The full Table 3.2.3.1.B continues to much larger faces, and sprinklered buildings use Tables 3.2.3.1.D and 3.2.3.1.E - consult the Code for those cases."
+}
